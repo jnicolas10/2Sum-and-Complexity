@@ -1,1 +1,84 @@
+//
+//  main.cpp
+//  CS_210
+//
+//  Created by Julian Saquic on 09/05/26.
+//
 
+#include <algorithm>
+#include <cassert>
+#include <iostream>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+using namespace std;
+
+pair<int, int> twoSumBruteForce(const vector<int>& nums, int target) {
+    const int n = static_cast<int>(nums.size());
+    for (int i = 0; i < n; ++i) {
+        for (int j = i + 1; j < n; ++j) {
+            if (nums[i] + nums[j] == target) {
+                return {i, j};
+            }
+        }
+    }
+    return {-1, -1};
+}
+
+pair<int, int> twoSumHash(const vector<int>& nums, int target) {
+    unordered_map<int, int> seen;
+    const int n = static_cast<int>(nums.size());
+
+    for (int i = 0; i < n; ++i) {
+        int complement = target - nums[i];
+        auto it = seen.find(complement);
+        if (it != seen.end()) {
+            return {it->second, i};
+        }
+        seen[nums[i]] = i;
+    }
+    return {-1, -1};
+}
+
+struct TestCase {
+    vector<int> nums;
+    int target;
+    string description;
+};
+
+void runTest(const TestCase& test) {
+    cout << "--- " << test.description << " ---\n";
+    cout << "Target: " << test.target << "\n";
+
+    auto [i1, j1] = twoSumBruteForce(test.nums, test.target);
+    bool valid1 = (i1 != -1 && j1 != -1 && i1 != j1 && test.nums[i1] + test.nums[j1] == test.target);
+    
+    cout << "[BruteForce] Indices: (" << i1 << ", " << j1 << ")"
+         << " | Values: (" << (i1 != -1 ? test.nums[i1] : 0) << ", " << (j1 != -1 ? test.nums[j1] : 0) << ")"
+         << " | Valid: " << boolalpha << valid1 << "\n";
+
+    auto [i2, j2] = twoSumHash(test.nums, test.target);
+    bool valid2 = (i2 != -1 && j2 != -1 && i2 != j2 && test.nums[i2] + test.nums[j2] == test.target);
+
+    cout << "[Hash Map]   Indices: (" << i2 << ", " << j2 << ")"
+         << " | Values: (" << (i2 != -1 ? test.nums[i2] : 0) << ", " << (j2 != -1 ? test.nums[j2] : 0) << ")"
+         << " | Valid: " << boolalpha << valid2 << "\n\n";
+}
+
+int main() {
+    vector<TestCase> testCases = {
+        { {15, 4, 18, 8, 19, 22, 24, 59, 59, 20, 18, 12, 36, 42, 9}, 24, "Required Test Case" },
+        { {3, 3}, 6, "Custom Test 1: Minimum size with duplicate elements" },
+        { {-10, -3, 2, 7, 11}, 4, "Custom Test 2: Negative numbers (-3 + 7 = 4)" },
+        { {1, 5, 8, 12, 14, 9}, 10, "Custom Test 3: Elements at start and end (1 + 9 = 10)" },
+        { {0, 4, 3, 0}, 0, "Custom Test 4: Zeros sum to zero" }
+    };
+
+    for (const auto& test : testCases) {
+        runTest(test);
+    }
+
+    return 0;
+}
